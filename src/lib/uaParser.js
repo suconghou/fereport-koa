@@ -32,13 +32,39 @@ const regexes = {
 	}
 };
 
-const parser = ua => {};
+const parser = ua => {
+	const { browser, os } = regexes;
+	const b = Object.keys(browser);
+	const o = Object.keys(os);
+	const r = { broswer: {}, os: {} };
+	for (let i = 0, j = b.length; i < j; i++) {
+		const bName = b[i];
+		const reg = browser[bName];
+		if (reg.test(ua)) {
+			const ret = reg.exec(ua);
+			r.broswer = {
+				name: bName,
+				version: ret.groups.version.replace(/_/g, '.')
+			};
+			break;
+		}
+	}
+	for (let i = 0, j = b.length; i < j; i++) {
+		const oName = o[i];
+		const reg = os[oName];
+		if (reg.test(ua)) {
+			const ret = reg.exec(ua);
+			r.os = {
+				name: oName,
+				version: ret.groups.version.replace(/_/g, '.')
+			};
+			break;
+		}
+	}
+	return r;
+};
 
 export default ua => {
 	const ret = parser(ua);
-	console.info(ret);
-	return {
-		// os,
-		// broswer
-	};
+	return ret;
 };

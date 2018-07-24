@@ -1,5 +1,6 @@
 import bodyParser from './bodyParser.js';
 import uaParser from './uaParser.js';
+import { uuid } from './util.js';
 
 const reportPath = /^\/report\/(\d{6})\/?$/;
 
@@ -10,19 +11,25 @@ export default async (ctx, next) => {
 		await bodyParser(ctx);
 		try {
 			ctx.request.body = JSON.parse(ctx.request.body);
+			const ua = ctx.get('user-agent');
+			const uaInfo = uaParser(ua);
 			const data = Object.assign(
 				{
+					uuid: uuid(),
 					ip: ctx.ip,
+					cookie: ctx.get('cookie'),
+					ua,
 					refer: ctx.get('referer'),
 					time: +new Date(),
-					siteId: id
+					sid: id,
+					uaInfo
 				},
 				ctx.request.body
 			);
-			uaParser(ctx.request.body.ua);
-			ctx.body = '';
-			console.info(id, data);
+			ctx.body = data;
+			console.info(data);
 		} catch (e) {
+			console.error(e);
 			ctx.body = e;
 		}
 	} else {
